@@ -32,4 +32,4 @@ media/
 Thumbs.db
 
 # Other or temporary files
-music/
+music/*
