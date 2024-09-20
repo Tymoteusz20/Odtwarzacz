@@ -1,4 +1,4 @@
-import sys 
+import sys , pygame
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout , QPushButton, QLabel
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
@@ -10,7 +10,13 @@ from utils import *
 class MusicApp(QWidget):
     def __init__(self):
         super().__init__()
+        pygame.mixer.init()
         self.songs = init_songs()
+        if self.songs:
+            self.current_song = self.songs[0]
+        else:
+            self.current_song = None
+        self.current_song_paused = False
         self.calosc()
 
     def calosc(self):
@@ -33,6 +39,9 @@ class MusicApp(QWidget):
         self.songs.append(new_song)
 
         if len(self.songs) == 1:
+            if self.current_song is None:
+                self.current_song = new_song
+                pygame.mixer.music.load(self.current_song.path)
             self.clear()
             self.songs_list_screen()
 
@@ -40,10 +49,21 @@ class MusicApp(QWidget):
         pass
 
     def handle_play_button(self):
-        pass
+        if not self.current_song_paused:
+            pygame.mixer.music.play()
+        else:
+            pygame.mixer.music.unpause()
+        self.play_button.setText('||')
+        self.play_button.clicked.disconnect(self.handle_play_button)
+        self.play_button.clicked.connect(self.handle_pause_button)
+        
     
     def handle_pause_button(self):
-        pass
+        pygame.mixer.music.pause()
+        self.current_song_paused = True
+        self.play_button.setText('|>')
+        self.play_button.clicked.disconnect(self.handle_pause_button)
+        self.play_button.clicked.connect(self.handle_play_button)
 
     def handle_next_button(self):
         pass
@@ -56,7 +76,7 @@ class MusicApp(QWidget):
         control_layout = QHBoxLayout()
 
         self.play_button = QPushButton("|>",self)
-        self.play_button.clicked.connect(play_song)
+        self.play_button.clicked.connect(self.handle_play_button)
 
         # self.pause_button = QPushButton("||",self)
         # self.pause_button.clicked.connect(pause_song)
