@@ -14,6 +14,7 @@ class MusicApp(QWidget):
         self.songs = init_songs()
         if self.songs:
             self.current_song = self.songs[0]
+            pygame.mixer.music.load(self.current_song.path)
         else:
             self.current_song = None
         self.current_song_paused = False
