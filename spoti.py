@@ -47,7 +47,11 @@ class MusicApp(QWidget):
             self.songs_list_screen()
 
     def handle_previous_button(self):
-        pass
+        if self.songs and self.current_song:
+            index = self.songs.index(self.current_song)
+            self.current_song = self.songs[index-1] 
+            pygame.mixer.music.load(self.current_song.path)
+            pygame.mixer.music.play()
 
     def handle_play_button(self):
         if not self.current_song_paused:
@@ -86,7 +90,7 @@ class MusicApp(QWidget):
         self.next_button.clicked.connect(next_song)
 
         self.previous_button = QPushButton("<-",self)
-        self.previous_button.clicked.connect(previous_song)
+        self.previous_button.clicked.connect(self.handle_previous_button)
 
         
         
