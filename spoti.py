@@ -1,7 +1,7 @@
 import sys , pygame
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout , QPushButton, QLabel
-from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon 
+from PyQt6.QtCore import Qt , QSize
 
 from buttons_functions import load_song, play_song,pause_song,next_song,previous_song
 
@@ -18,7 +18,13 @@ class MusicApp(QWidget):
         else:
             self.current_song = None
         self.current_song_paused = False
+        self.next_icon = QIcon('icons/next_icon.png')
+        self.play_icon = QIcon('icons/play_icon.png')
+        self.pause_icon = QIcon('icons/pause_icon.png')
+        self.previous_icon = QIcon('icons/previous_icon.png')
         self.calosc()
+       
+
 
     def calosc(self):
 
@@ -52,13 +58,20 @@ class MusicApp(QWidget):
             self.current_song = self.songs[index-1] 
             pygame.mixer.music.load(self.current_song.path)
             pygame.mixer.music.play()
+            if self.play_button.icon() != self.play_icon:
+                self.play_button.setIcon(self.pause_icon)
+                try:
+                    self.play_button.clicked.disconnect(self.handle_play_button)
+                except TypeError:
+                    pass
+                self.play_button.clicked.connect(self.handle_pause_button)
 
     def handle_play_button(self):
         if not self.current_song_paused:
             pygame.mixer.music.play()
         else:
             pygame.mixer.music.unpause()
-        self.play_button.setText('||')
+        self.play_button.setIcon(self.pause_icon)
         self.play_button.clicked.disconnect(self.handle_play_button)
         self.play_button.clicked.connect(self.handle_pause_button)
         
@@ -66,12 +79,24 @@ class MusicApp(QWidget):
     def handle_pause_button(self):
         pygame.mixer.music.pause()
         self.current_song_paused = True
-        self.play_button.setText('|>')
+        self.play_button.setIcon(self.play_icon)
         self.play_button.clicked.disconnect(self.handle_pause_button)
         self.play_button.clicked.connect(self.handle_play_button)
 
     def handle_next_button(self):
-        pass
+        if self.songs and self.current_song:
+            index = self.songs.index(self.current_song)
+            self.current_song = self.songs[(index+1)%len(self.songs)]
+            pygame.mixer.music.load(self.current_song.path)
+            pygame.mixer.music.play()
+            if self.play_button.icon() != self.play_icon:
+                self.play_button.setIcon(self.pause_icon)
+                try:
+                    self.play_button.clicked.disconnect(self.handle_play_button)
+                except TypeError:
+                    pass
+                self.play_button.clicked.connect(self.handle_pause_button)
+                
 
     def songs_list_screen(self):
        
@@ -80,16 +105,34 @@ class MusicApp(QWidget):
 
         control_layout = QHBoxLayout()
 
-        self.play_button = QPushButton("|>",self)
+        self.play_button = QPushButton(self)
+        self.play_button.setStyleSheet("""
+            width: 64px;
+            height: 64px;
+        """)
+        self.play_button.setIconSize(QSize(64, 64))
+        self.play_button.setIcon(self.play_icon)
         self.play_button.clicked.connect(self.handle_play_button)
 
         # self.pause_button = QPushButton("||",self)
         # self.pause_button.clicked.connect(pause_song)
 
-        self.next_button = QPushButton("->",self)
-        self.next_button.clicked.connect(next_song)
+        self.next_button = QPushButton(self)
+        self.next_button.setStyleSheet("""
+            width: 64px;
+            height: 64px;
+        """)
+        self.next_button.setIconSize(QSize(64, 64))
+        self.next_button.setIcon(self.next_icon)
+        self.next_button.clicked.connect(self.handle_next_button)
 
-        self.previous_button = QPushButton("<-",self)
+        self.previous_button = QPushButton(self)
+        self.previous_button.setStyleSheet("""
+            width: 64px;
+            height: 64px;
+        """)
+        self.previous_button.setIconSize(QSize(64, 64))
+        self.previous_button.setIcon(self.previous_icon)
         self.previous_button.clicked.connect(self.handle_previous_button)
 
         
